@@ -1,0 +1,27 @@
+name: Docker Deploy Workflow
+
+on:
+  push:
+    branches:
+      - DO/DEV
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build the Docker image
+      run: |
+        docker build -t simple-go-app .
+        docker tag simple-go-app your-dockerhub-username/simple-go-app:latest
+
+    - name: Push the Docker image
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        docker push your-dockerhub-username/simple-go-app:latest
